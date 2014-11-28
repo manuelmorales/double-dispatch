@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'double_serializer/version'
+require 'double_dispatch/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "double_serializer"
-  spec.version       = DoubleSerializer::VERSION
+  spec.name          = "double_dispatch"
+  spec.version       = DoubleDispatch::VERSION
   spec.authors       = ["Manuel Morales"]
   spec.email         = ["manuelmorales@gmail.com"]
-  spec.summary       = %q{Allows the creation of double dispatch based serializers.}
-  spec.description   = %q{Allows the creation of custom serializers the do not pollute the serialized classes thanks to double dispatch.}
-  spec.homepage      = "https://github.com/manuelmorales/double_serializer"
+  spec.summary       = %q{Allows double dispatching method calls.}
+  spec.description   = %q{Allows the creation of different implementations of the same method based on the class of the method arguments, similar to overloading in Java.}
+  spec.homepage      = "https://github.com/manuelmorales/double_dispatcher"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -23,3 +23,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry", "~> 0.10"
   spec.add_development_dependency "rspec", "~> 3.1.0"
 end
+

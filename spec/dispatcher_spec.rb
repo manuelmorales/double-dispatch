@@ -1,6 +1,13 @@
 require_relative 'spec_helper'
 
-RSpec.shared_examples_for 'double dispatcher' do
+RSpec.describe Dispatcher do
+  before do
+    stub_const 'MyModule', Module.new
+    stub_const 'MyClass', Class.new{ include MyModule }
+    stub_const 'MySubClass', Class.new(MyClass)
+  end
+
+  let(:dispatcher_class){ Dispatcher }
   let(:target){ double('target') }
   let(:dispatcher){ dispatcher_class.new }
 

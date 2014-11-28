@@ -1,8 +1,7 @@
 require_relative 'spec_helper'
-require 'double_dispatchable'
 
-RSpec.describe DoubleDispatchable do
-  let(:klass) { Class.new{ include DoubleDispatchable } }
+RSpec.describe Dispatchable do
+  let(:klass) { Class.new{ include Dispatchable } }
   let(:instance) { klass.new }
   subject { instance }
 
