@@ -1,7 +1,8 @@
-# DoubleSerializer
+# DoubleDispatch
 
-Allows the creation of custom serializers that do not pollute the serialized classes thanks to double dispatch.
-It allows separating objects from their representation.
+Allows the creation of different implementations of the same method based on the class of the method arguments,
+similar to overloading in Java.
+Unlike other implementations of the same pattern, this one doesn't overload the Object class.
 
 
 ## Quick Start
@@ -11,102 +12,44 @@ Using Gemfile:
 ```
 # Gemfile
 ...
-gem 'double_serializer'
+gem 'double_dispatch'
 ...
 
 $ bundle install
 ```
 
-Creating and using a custom serializer.
-
- * Include the module.
- * Use the `simplifies` method to define how to convert each object to a simple objects, like a hash.
- * Use the `serializes` method to define how finally convert such simplified object to a string.
-
 
 ```ruby
-require 'double_serializer'
-require 'json'
+require 'double_dispatch'
 
-# The serializable animals
+# The visitable animals
 Animal = Struct.new(:name)
 Lion = Class.new(Animal)
 Meerkat = Class.new(Animal)
 
-# The serializer class
-class Serializer
-  include DoubleSerializer::Serializable
+class Visitor
+  include DoubleDispatch::Dispatchable
 
-  simplifies Animal do |animal|
-    {name: animal.name}
+  double_dispatch :visit, Animal do |animal|
+    "An animal."
   end
 
-  simplifies Lion do |lion|
-    {name: "King #{lion.name}"}
-  end
-
-  serializes do |obj|
-    JSON.dump obj
+  double_dispatch :visit, Lion do |animal|
+    "A lion."
   end
 end
 
-# Let's serialize something
-serializer = Serializer.new
-zoo = [Lion.new('Simba'), Meerkat.new('Timon')]
+visitor = Visitor.new
 
-result = serializer.serialize(zoo)
-# => [{"name":"King Simba"},{"name":"Timon"}]
+visitor.visit Lion.new('Simba')
+# => "An animal."
+
+visitor.visit Meerkat.new('Timon')
+# => "An animal."
 ```
 
-Notice how both of them are animals, but the serializer picked the best match for Lion.
-
-
-## Explanation
-
-The serializer will actually serialize the objects in a two step process.
-The first one, called *simplify* is supposed to convert the target into a simple representation.
-Just with basic ruby objects like integers, strings, hashes and arrays.
-The second one is the true *serialize* step. 
-In which the block called at initialization will be called.
-It has the purpose of taking the simplified object and converting it into a string.
-
-This two step process was introduced because serializers are usually not idempotent and can't be nested.
-However, _simplifiers_ are.
-
-
-## Advanced usage
-
-Customise your serializer at will adding new methds to it.
-Everything runs within the instance of the serializer.
-This allows serializer customizations and nesting:
-
-```ruby
-class Serializer
-  include DoubleSerializer::Serializable
-  attr_accessor :name_prefix
-
-  simplifies Animal do |animal|
-    result = {}
-    result[:name] = "#{name_prefix} #{animal.name}"            # Using an instance method of the serializer
-    result[:father] = simplify(animal.father) if animal.father # Nesting
-    result
-  end
-
-  serializes do |obj|
-    JSON.dump obj
-  end
-end
-
-serializer = Serializer.new
-serializer.name_prefix = 'An animal called'
-simba = Lion.new('Simba', Lion.new('Mufasa'))
-
-result = serializer.serialize(simba)
-# => {"name":"An animal called Simba","father":{"name":"An animal called Mufasa"}}
-```
-
-Another important point is inheritance.
-You can create subclasses of your Serializer which will try to match their own simplifiers first
+Inheritance can be used to create more specific visitor.
+You can create subclasses of your Visitor which will try to match their own methods first
 and delegate to the parent class when none found.
 
 
